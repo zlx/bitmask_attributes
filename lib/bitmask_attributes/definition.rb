@@ -118,7 +118,16 @@ module BitmaskAttributes
                 {:conditions => sets.join(' AND ')}
               end
             }
-          scope :without_#{attribute}, :conditions => "#{attribute} = 0 OR #{attribute} IS NULL"
+          scope :without_#{attribute}, 
+            proc { |value| 
+              if value
+                mask = #{model}.bitmask_for_#{attribute}(value)
+                { :conditions => ["#{attribute} IS NULL OR #{attribute} & ? = 0", mask] }
+              else
+                { :conditions => "#{attribute} IS NULL OR #{attribute} = 0" }
+              end              
+              }                    
+          
           scope :no_#{attribute},      :conditions => "#{attribute} = 0 OR #{attribute} IS NULL"
           
           scope :with_any_#{attribute},
