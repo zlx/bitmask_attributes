@@ -109,44 +109,44 @@ module BitmaskAttributes
           scope :with_#{attribute},
             proc { |*values|
               if values.blank?
-                {:conditions => '#{attribute} > 0 OR #{attribute} IS NOT NULL'}
+                where('#{attribute} > 0 OR #{attribute} IS NOT NULL')
               else
                 sets = values.map do |value|
                   mask = #{model}.bitmask_for_#{attribute}(value)
                   "#{attribute} & \#{mask} <> 0"
                 end
-                {:conditions => sets.join(' AND ')}
+                where(sets.join(' AND '))
               end
             }
           scope :without_#{attribute}, 
             proc { |value| 
               if value
                 mask = #{model}.bitmask_for_#{attribute}(value)
-                { :conditions => ["#{attribute} IS NULL OR #{attribute} & ? = 0", mask] }
+                where("#{attribute} IS NULL OR #{attribute} & ? = 0", mask)
               else
-                { :conditions => "#{attribute} IS NULL OR #{attribute} = 0" }
+                where("#{attribute} IS NULL OR #{attribute} = 0")
               end              
               }                    
           
-          scope :no_#{attribute},      :conditions => "#{attribute} = 0 OR #{attribute} IS NULL"
+          scope :no_#{attribute}, where("#{attribute} = 0 OR #{attribute} IS NULL")
           
           scope :with_any_#{attribute},
             proc { |*values|
               if values.blank?
-                {:conditions => '#{attribute} > 0 OR #{attribute} IS NOT NULL'}
+                where('#{attribute} > 0 OR #{attribute} IS NOT NULL')
               else
                 sets = values.map do |value|
                   mask = #{model}.bitmask_for_#{attribute}(value)
                   "#{attribute} & \#{mask} <> 0"
                 end
-                {:conditions => sets.join(' OR ')}
+                where(sets.join(' OR '))
               end
             }
         )
         values.each do |value|
           model.class_eval %(
             scope :#{attribute}_for_#{value},
-                  :conditions => ['#{attribute} & ? <> 0', #{model}.bitmask_for_#{attribute}(:#{value})]
+                  where('#{attribute} & ? <> 0', #{model}.bitmask_for_#{attribute}(:#{value}))
           )
         end      
       end
