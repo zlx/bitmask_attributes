@@ -35,6 +35,20 @@ def gem_file
   "#{name}-#{version}.gem"
 end
 
+require 'rdoc/task'
+require 'sdoc'
+Rake::RDocTask.new do |rdoc|
+  rdoc.rdoc_dir = 'doc'
+  rdoc.title = "#{name} #{version}"
+  rdoc.options << '-f' << 'sdoc'
+  rdoc.options << '-a'
+  rdoc.options << '--markup' << 'tomdoc'
+  rdoc.options << '-m' << 'README.rdoc'
+  rdoc.rdoc_files.include('CHANGELOG*')
+  rdoc.rdoc_files.include('README*')
+  rdoc.rdoc_files.include('lib/**/*.rb')
+end
+
 
 #############################################################################
 #
@@ -98,7 +112,6 @@ EOF
     load "lib/#{name}/version.rb"
     file    = "CHANGELOG.rdoc"
     old     = File.read(file)
-    version = Deals::VERSION
     message = "Bumping to version #{version}"
 
     File.open(file, "w") do |f|
@@ -110,9 +123,9 @@ EOF
 EOF
     end
 
-    exec "#{ENV["EDITOR"]} #{file}"
     Rake::Task['build'].invoke
-    exec ["git commit -aqm '#{message}'",
+    exec ["#{ENV["EDITOR"]} #{file}",
+          "git commit -aqm '#{message}'",
           "git tag -a -m '#{message}' v#{version}",
           "git push origin master",
           "git push origin $(git tag | tail -1)",
