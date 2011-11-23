@@ -1,0 +1,11 @@
+=== Version 0.2.4 - 2011-11-23 09:37:50 +0000
+
+Ivan Buiko (3):
+* No longer validates attribute during migrations
+
+Joel Moss (3):
+* Added changeling tasks for help with gem releases
+* Created docs using sdoc
+
+
+
