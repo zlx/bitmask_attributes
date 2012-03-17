@@ -106,11 +106,16 @@ module BitmaskAttributes
       end
     
       def create_scopes_on(model)
+        if (column = model.columns.detect{|column| column.name == attribute.to_s}) && column.null
+          or_is_null_condition = " OR #{attribute} IS NULL"
+          or_is_not_null_condition = " OR #{attribute} IS NOT NULL"
+        end
+
         model.class_eval %(
           scope :with_#{attribute},
             proc { |*values|
               if values.blank?
-                where('#{attribute} > 0 OR #{attribute} IS NOT NULL')
+                where('#{attribute} > 0#{or_is_not_null_condition}')
               else
                 sets = values.map do |value|
                   mask = #{model}.bitmask_for_#{attribute}(value)
@@ -123,24 +128,21 @@ module BitmaskAttributes
             proc { |value| 
               if value
                 mask = #{model}.bitmask_for_#{attribute}(value)
-                where("#{attribute} IS NULL OR #{attribute} & ? = 0", mask)
+                where("#{attribute} & ? = 0#{or_is_null_condition}", mask)
               else
-                where("#{attribute} IS NULL OR #{attribute} = 0")
+                where("#{attribute} = 0#{or_is_null_condition}")
               end              
               }                    
           
-          scope :no_#{attribute}, where("#{attribute} = 0 OR #{attribute} IS NULL")
+          scope :no_#{attribute}, where("#{attribute} = 0#{or_is_null_condition}")
           
           scope :with_any_#{attribute},
             proc { |*values|
               if values.blank?
-                where('#{attribute} > 0 OR #{attribute} IS NOT NULL')
+                where('#{attribute} > 0#{or_is_not_null_condition}')
               else
-                sets = values.map do |value|
-                  mask = #{model}.bitmask_for_#{attribute}(value)
-                  "#{attribute} & \#{mask} <> 0"
-                end
-                where(sets.join(' OR '))
+                mask = values.inject(0){|sum,value| sum + #{model}.bitmask_for_#{attribute}(value)}
+                where("#{attribute} & \#{mask} <> 0")
               end
             }
         )
