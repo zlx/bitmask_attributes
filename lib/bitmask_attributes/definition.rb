@@ -17,17 +17,20 @@ module BitmaskAttributes
       create_scopes_on model
       create_attribute_methods_on model
     end
-    
+
     private
 
-      def validate_for(model)
+      def model_not_ready?(model)
         # The model cannot be validated if it is preloaded and the attribute/column is not in the
         # database (the migration has not been run) or table doesn't exist. This usually
         # occurs in the 'test' and 'production' environment or during migration.
-        return if defined?(Rails) && Rails.configuration.cache_classes || !model.table_exists?
+        defined?(Rails) && Rails.configuration.cache_classes || !model.table_exists?
+      end
+
+      def validate_for(model)
+        return if model_not_ready?(model)
 
         unless model.columns.detect { |col| col.name == attribute.to_s }
-          # raise ArgumentError, "`#{attribute}' is not an attribute of `#{model}'"
           Rails.logger.warn "WARNING: `#{attribute}' is not an attribute of `#{model}'. But, it's ok if it happens during migrations and your \"bitmasked\" attribute is still not created."
         end
       end
@@ -106,6 +109,8 @@ module BitmaskAttributes
       end
     
       def create_scopes_on(model)
+        return if model_not_ready?(model)
+
         if (column = model.columns.detect{|column| column.name == attribute.to_s}) && column.null
           or_is_null_condition = " OR #{attribute} IS NULL"
           or_is_not_null_condition = " OR #{attribute} IS NOT NULL"
