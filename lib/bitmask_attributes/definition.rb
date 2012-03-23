@@ -125,13 +125,13 @@ module BitmaskAttributes
               end
             }
           scope :without_#{attribute}, 
-            proc { |value| 
-              if value
-                mask = #{model}.bitmask_for_#{attribute}(value)
-                where("#{attribute} & ? = 0#{or_is_null_condition}", mask)
-              else
+            proc { |*values|
+              if values.blank?
                 where("#{attribute} = 0#{or_is_null_condition}")
-              end              
+              else
+                mask = values.inject(0){|sum,value| sum + #{model}.bitmask_for_#{attribute}(value)}
+                where("#{attribute} & ? = 0#{or_is_null_condition}", mask)
+              end
               }                    
 
           scope :with_exact_#{attribute},
