@@ -89,7 +89,7 @@ Find records without specific attributes:
     # => (all users who are not editors)
 
     User.without_roles(:writer, :editor)
-    # => (all users who are neither writers nor editors)
+    # => (all users who are NEITHER writers nor editors)
 
 Note that "without_" supports one or more attribute arguments, and the "no_" method does not support arguments.
 And "with_exact_" without arguments is alias for "no_"
