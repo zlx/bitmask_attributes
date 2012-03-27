@@ -179,6 +179,20 @@ class BitmaskAttributesTest < ActiveSupport::TestCase
           assert_equal [@campaign1], @company.campaigns.with_exact_medium(:web, :print)
           assert_equal [@campaign2], @company.campaigns.with_exact_medium
         end
+
+        should "not retrieve retrieve a subsequent zero value for an unqualified with scope " do
+          assert_equal [@campaign1, @campaign3, @campaign4, @campaign5, @campaign6, @campaign7], @company.campaigns.with_medium
+          @campaign4.medium = []
+          @campaign4.save
+          assert_equal [@campaign1, @campaign3, @campaign5, @campaign6, @campaign7], @company.campaigns.with_medium
+        end
+
+        should "not retrieve retrieve a subsequent zero value for a qualified with scope " do
+          assert_equal [@campaign1, @campaign3, @campaign4, @campaign5, @campaign6], @company.campaigns.with_medium(:web)
+          @campaign4.medium = []
+          @campaign4.save
+          assert_equal [@campaign1, @campaign3, @campaign5, @campaign6], @company.campaigns.with_medium(:web)
+        end
       end
 
       should "can check if at least one value is set" do

@@ -115,7 +115,7 @@ module BitmaskAttributes
           scope :with_#{attribute},
             proc { |*values|
               if values.blank?
-                where('#{attribute} > 0#{or_is_not_null_condition}')
+                where('#{attribute} > 0')
               else
                 sets = values.map do |value|
                   mask = #{model}.bitmask_for_#{attribute}(value)
