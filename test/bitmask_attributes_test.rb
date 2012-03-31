@@ -185,6 +185,7 @@ class BitmaskAttributesTest < ActiveSupport::TestCase
           @campaign4.medium = []
           @campaign4.save
           assert_equal [@campaign1, @campaign3, @campaign5, @campaign6, @campaign7], @company.campaigns.with_medium
+          assert_equal [@campaign1, @campaign3, @campaign5, @campaign6, @campaign7], @company.campaigns.with_any_medium
         end
 
         should "not retrieve retrieve a subsequent zero value for a qualified with scope " do
@@ -192,6 +193,7 @@ class BitmaskAttributesTest < ActiveSupport::TestCase
           @campaign4.medium = []
           @campaign4.save
           assert_equal [@campaign1, @campaign3, @campaign5, @campaign6], @company.campaigns.with_medium(:web)
+          assert_equal [@campaign1, @campaign3, @campaign5, @campaign6], @company.campaigns.with_any_medium(:web)
         end
       end
 

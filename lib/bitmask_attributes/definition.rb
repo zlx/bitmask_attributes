@@ -127,20 +127,18 @@ module BitmaskAttributes
           scope :without_#{attribute}, 
             proc { |*values|
               if values.blank?
-                where("#{attribute} = 0#{or_is_null_condition}")
+                no_#{attribute}
               else
-                mask = values.inject(0){|sum,value| sum + #{model}.bitmask_for_#{attribute}(value)}
-                where("#{attribute} & ? = 0#{or_is_null_condition}", mask)
+                where("#{attribute} & ? = 0#{or_is_null_condition}", #{model}.bitmask_for_#{attribute}(*values))
               end
-              }                    
+            }
 
           scope :with_exact_#{attribute},
             proc { | *values|
               if values.blank?
                 no_#{attribute}
               else
-                mask = values.inject(0) {|sum, value| sum | #{model}.bitmask_for_#{attribute}(value) }
-                where("#{attribute} = ?", mask)
+                where("#{attribute} = ?", #{model}.bitmask_for_#{attribute}(*values))
               end
             }
           
@@ -149,10 +147,9 @@ module BitmaskAttributes
           scope :with_any_#{attribute},
             proc { |*values|
               if values.blank?
-                where('#{attribute} > 0#{or_is_not_null_condition}')
+                where('#{attribute} > 0')
               else
-                mask = values.inject(0){|sum,value| sum + #{model}.bitmask_for_#{attribute}(value)}
-                where("#{attribute} & \#{mask} <> 0")
+                where("#{attribute} & ? <> 0", #{model}.bitmask_for_#{attribute}(*values))
               end
             }
         )
