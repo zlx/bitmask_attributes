@@ -118,7 +118,7 @@ module BitmaskAttributes
                 where('#{attribute} > 0')
               else
                 sets = values.map do |value|
-                  mask = #{model}.bitmask_for_#{attribute}(value)
+                  mask = ::#{model}.bitmask_for_#{attribute}(value)
                   "#{attribute} & \#{mask} <> 0"
                 end
                 where(sets.join(' AND '))
@@ -129,7 +129,7 @@ module BitmaskAttributes
               if values.blank?
                 no_#{attribute}
               else
-                where("#{attribute} & ? = 0#{or_is_null_condition}", #{model}.bitmask_for_#{attribute}(*values))
+                where("#{attribute} & ? = 0#{or_is_null_condition}", ::#{model}.bitmask_for_#{attribute}(*values))
               end
             }
 
@@ -138,7 +138,7 @@ module BitmaskAttributes
               if values.blank?
                 no_#{attribute}
               else
-                where("#{attribute} = ?", #{model}.bitmask_for_#{attribute}(*values))
+                where("#{attribute} = ?", ::#{model}.bitmask_for_#{attribute}(*values))
               end
             }
           
@@ -149,14 +149,14 @@ module BitmaskAttributes
               if values.blank?
                 where('#{attribute} > 0')
               else
-                where("#{attribute} & ? <> 0", #{model}.bitmask_for_#{attribute}(*values))
+                where("#{attribute} & ? <> 0", ::#{model}.bitmask_for_#{attribute}(*values))
               end
             }
         )
         values.each do |value|
           model.class_eval %(
             scope :#{attribute}_for_#{value},
-                  proc { where('#{attribute} & ? <> 0', #{model}.bitmask_for_#{attribute}(:#{value})) }
+                  proc { where('#{attribute} & ? <> 0', ::#{model}.bitmask_for_#{attribute}(:#{value})) }
           )
         end      
       end
