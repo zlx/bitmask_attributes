@@ -1,0 +1,242 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Bitmask attributes by joelmoss</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Bitmask attributes</h1>
+        <p>Simple bitmask attribute support for ActiveRecord 3+</p>
+        <p class="view"><a href="https://github.com/joelmoss/bitmask_attributes">View the Project on GitHub <small>joelmoss/bitmask_attributes</small></a></p>
+        <ul>
+          <li><a href="https://github.com/joelmoss/bitmask_attributes/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/joelmoss/bitmask_attributes/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/joelmoss/bitmask_attributes">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>BitmaskAttributes</h1>
+
+<p>Transparent manipulation of bitmask attributes for ActiveRecord, based on
+the bitmask-attribute gem, which has been dormant since 2009. This updated
+gem work with Rails 3 and up (including Rails 3.1).</p>
+
+<h2>Installation</h2>
+
+<p>The best way to install is with RubyGems:</p>
+
+<pre><code>$ [sudo] gem install bitmask_attributes
+</code></pre>
+
+<p>Or better still, just add it to your Gemfile:</p>
+
+<pre><code>gem 'bitmask_attributes'
+</code></pre>
+
+<h2>Example</h2>
+
+<p>Simply declare an existing integer column as a bitmask with its possible
+values.</p>
+
+<pre><code>class User &lt; ActiveRecord::Base
+  bitmask :roles, :as =&gt; [:writer, :publisher, :editor, :proofreader]
+end
+</code></pre>
+
+<p>You can then modify the column using the declared values without resorting
+to manual bitmasks.</p>
+
+<pre><code>user = User.create(:name =&gt; "Bruce", :roles =&gt; [:publisher, :editor])
+user.roles
+# =&gt; [:publisher, :editor]
+user.roles &lt;&lt; :writer
+user.roles
+# =&gt; [:publisher, :editor, :writer]
+</code></pre>
+
+<p>It's easy to find out if a record has a given value:</p>
+
+<pre><code>user.roles?(:editor)
+# =&gt; true
+</code></pre>
+
+<p>You can check for multiple values (uses an <code>and</code> boolean):</p>
+
+<pre><code>user.roles?(:editor, :publisher)
+# =&gt; true
+user.roles?(:editor, :proofreader)
+# =&gt; false
+</code></pre>
+
+<p>Or, just check if any values are present:</p>
+
+<pre><code>user.roles?
+# =&gt; true
+</code></pre>
+
+<p>You can get the list of values for any given attribute:</p>
+
+<pre><code>User.values_for_roles
+# =&gt; [:writer, :publisher, :editor, :proofreader]
+</code></pre>
+
+<h2>Named Scopes</h2>
+
+<p>A couple useful named scopes are also generated when you use
+<code>bitmask</code>:</p>
+
+<pre><code>User.with_roles
+# =&gt; (all users with roles)
+User.with_roles(:editor)
+# =&gt; (all editors)
+User.with_roles(:editor, :writer)
+# =&gt; (all users who are BOTH editors and writers)
+User.with_any_roles(:editor, :writer)
+# =&gt; (all users who are editors OR writers)
+User.with_exact_roles(:writer)
+# =&gt; (all users who are ONLY writers)
+User.with_exact_roles(:writer, :editor)
+# =&gt; (all users who are BOTH editors and writers and nothing else)
+</code></pre>
+
+<p>Find records without any bitmask set:</p>
+
+<pre><code>User.without_roles
+# =&gt; (all users without a role)
+User.no_roles
+# =&gt; (all users without a role)
+</code></pre>
+
+<p>Find records without specific attributes:</p>
+
+<pre><code>User.without_roles(:editor)
+# =&gt; (all users who are not editors)
+
+User.without_roles(:writer, :editor)
+# =&gt; (all users who are NEITHER writers nor editors)
+</code></pre>
+
+<p>Note that "without<em>" supports one or more attribute arguments, and the "no</em>" method does not support arguments.
+And "with<em>exact</em>" without arguments is alias for "no_"</p>
+
+<h2>Adding Methods</h2>
+
+<p>You can add your own methods to the bitmasked attributes (similar to
+named scopes):</p>
+
+<pre><code>bitmask :other_attribute, :as =&gt; [:value1, :value2] do
+  def worked?
+    true
+  end
+end
+
+user = User.first
+user.other_attribute.worked?
+# =&gt; true
+</code></pre>
+
+<h2>Handling null values</h2>
+
+<p>By default, bitmasks support the potential for the underlying integer value to be null. However, if you have created
+a field that is guaranteed never to be null, you can simplify the SQL query conditions by declaring ":null =&gt; false"
+in the definition:</p>
+
+<pre><code> bitmask :never_null_attributes,:as =&gt; [:value1, :value2], :null =&gt; false
+</code></pre>
+
+<h2>Allowing for a "zero" value</h2>
+
+<p>It is common to use web forms to set bitmask bits using checkboxes. If the various bits each are represented by a
+checkbox and the user unchecks them all, the resulting "params" posted to the controller will be missing. When this
+happens, a controller will need to ensure that a "params" hash entry has an empty array or a call to "update_attributes"
+will not change the attribute. For example:</p>
+
+<pre><code>In model...
+    class SomeModel &lt; ActiveRecord::Base
+        bitmask :some_attribute, :as =&gt; [:value1, :value2]
+    end
+
+In view...
+    &lt;input type="checkbox" name="some_model[some_attribute][]" value="value1"/&gt;
+    &lt;input type="checkbox" name="some_model[some_attribute][]" value="value2"/&gt;
+
+In controller...
+    def update
+        @some_model = SomeModel.find(params[:id])
+        params[:some_attribute] ||= []
+        @some_model.update_attributes(params)
+    end
+</code></pre>
+
+<p>As an alternative, you may provide a special symbol representing "zero":</p>
+
+<pre><code>In model...
+    class SomeModel &lt; ActiveRecord::Base
+        bitmask :some_attribute, :as =&gt; [:value1, :value2], :zero_value =&gt; :none
+    end
+
+In view...
+    &lt;input type="checkbox" name="some_model[some_attribute][]" value="value1"/&gt;
+    &lt;input type="checkbox" name="some_model[some_attribute][]" value="value2"/&gt;
+    &lt;input type="hidden"   name="some_model[some_attribute][]" value="none"/&gt;
+
+In controller...
+    def update
+        @some_model = SomeModel.find(params[:id])
+        @some_model.update_attributes(params)
+    end
+</code></pre>
+
+<p>This technique can be particularly useful for both forms and web services where setting the attribute in question may
+be optionally included or not such that the controller setting of an empty array in the first example would not be
+correct.</p>
+
+<h2>Warning: Modifying possible values</h2>
+
+<p>IMPORTANT: Once you have data using a bitmask, don't change the order
+of the values, remove any values, or insert any new values in the <code>:as</code>
+array anywhere except at the end.  You won't like the results.</p>
+
+<h2>Contributing</h2>
+
+<ol>
+<li>Fork it.</li>
+<li>Create a branch (<code>git checkout -b new-feature</code>)</li>
+<li>Make your changes</li>
+<li>Run the tests (<code>bundle install</code> then <code>bundle exec rake</code>)</li>
+<li>Commit your changes (<code>git commit -am "Created new feature"</code>)</li>
+<li>Push to the branch (<code>git push origin new-feature</code>)</li>
+<li>Create a <a href="http://help.github.com/send-pull-requests/">pull request</a> from your branch.</li>
+<li>Promote it. Get others to drop in and +1 it.</li>
+</ol><h2>Credits</h2>
+
+<p>Thanks to <a href="https://github.com/bruce">Bruce Williams</a> and the following contributors
+of the bitmask-attribute plugin:</p>
+
+<ul>
+<li><a href="http://github.com/ambethia">Jason L Perry</a></li>
+<li><a href="http://github.com/nfo">Nicolas Fouché</a></li>
+<li><a href="http://github.com/IvanBuiko">Ivan Buiko</a></li>
+</ul><h2>Copyright</h2>
+
+<p>Copyright (c) 2007-2009 Bruce Williams &amp; 2011-2012 Joel Moss. See LICENSE for details.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/joelmoss">joelmoss</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
