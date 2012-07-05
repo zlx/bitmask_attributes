@@ -12,7 +12,6 @@ module BitmaskAttributes
 
       bitmask_definitions[attribute] = Definition.new(attribute, options[:as].to_a,options[:null].nil? || options[:null], options[:zero_value], &extension)
       bitmask_definitions[attribute].install_on(self)
-      @local = !descends_from_active_record?
     end
 
     def bitmask_definitions
@@ -26,11 +25,11 @@ module BitmaskAttributes
     protected
 
     def base_class_bitmask_definitions
-      @bitmasks ||= {}
+      @bitmask_definitions ||= {}
     end
 
     def base_class_bitmasks
-      @bitmask_definitions ||= {}
+      @bitmasks ||= {}
     end
   end
 end
