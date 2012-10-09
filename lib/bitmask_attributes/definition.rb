@@ -64,8 +64,8 @@ module BitmaskAttributes
             unless entry.is_a? Fixnum
               raise ArgumentError, "Expected a Fixnum, but got: \#{entry.inspect}"
             end
-            self.send(:write_attribute, :#{attribute}, entry)
             @#{attribute} = nil
+            self.send(:write_attribute, :#{attribute}, entry)
           end
         )
       end
