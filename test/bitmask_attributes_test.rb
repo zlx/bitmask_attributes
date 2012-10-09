@@ -53,6 +53,14 @@ class BitmaskAttributesTest < ActiveSupport::TestCase
         assert_stored campaign, :phone, :email
       end
 
+      should "can assign raw bitmask values" do
+        campaign = @campaign_class.new
+        campaign.medium_bitmask = 3
+        assert_stored campaign, :web, :print
+        campaign.medium_bitmask = 0
+        assert_empty campaign.medium
+      end
+
       should "can save bitmask to db and retrieve values transparently" do
         campaign = @campaign_class.new(:medium => [:web, :print])
         assert_stored campaign, :web, :print

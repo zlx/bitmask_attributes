@@ -60,6 +60,13 @@ module BitmaskAttributes
             values = raw_value.kind_of?(Array) ? raw_value : [raw_value]
             self.#{attribute}.replace(values.reject{|value| #{eval_string_for_zero('value')}})
           end
+          def #{attribute}_bitmask=(entry)
+            unless entry.is_a? Fixnum
+              raise ArgumentError, "Expected a Fixnum, but got: \#{entry.inspect}"
+            end
+            self.send(:write_attribute, :#{attribute}, entry)
+            @#{attribute} = nil
+          end
         )
       end
     
