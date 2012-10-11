@@ -86,9 +86,16 @@ class BitmaskAttributesTest < ActiveSupport::TestCase
         assert_unsupported { campaign.medium = [:so_will_this] }
       end
 
-      should "cannot use unsupported values for raw bitmask values" do
+      should "can only use Fixnum values for raw bitmask values" do
         campaign = @campaign_class.new(:medium => :web)
         assert_unsupported { campaign.medium_bitmask = :this_will_fail }
+      end
+
+      should "cannot use unsupported values for raw bitmask values" do
+        campaign = @campaign_class.new(:medium => :web)
+        number_of_attributes = @campaign_class.bitmasks[:medium].size
+        assert_unsupported { campaign.medium_bitmask = (2 ** number_of_attributes) }
+        assert_unsupported { campaign.medium_bitmask = -1 }
       end
 
       should "can determine bitmasks using convenience method" do
