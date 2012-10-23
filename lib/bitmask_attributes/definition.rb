@@ -172,7 +172,7 @@ module BitmaskAttributes
               end
             }
 
-          scope :no_#{attribute}, proc { where("#{attribute} = 0#{or_is_null_condition}") }
+          scope :no_#{attribute}, proc { where("#{model.table_name}.#{attribute} = 0#{or_is_null_condition}") }
 
           scope :with_any_#{attribute},
             proc { |*values|
