@@ -139,7 +139,7 @@ module BitmaskAttributes
       end
 
       def create_scopes_on(model)
-        or_is_null_condition = " OR #{attribute} IS NULL" if allow_null
+        or_is_null_condition = " OR #{model.table_name}.#{attribute} IS NULL" if allow_null
 
         model.class_eval %(
           scope :with_#{attribute},
