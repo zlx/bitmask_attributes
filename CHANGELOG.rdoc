@@ -1,3 +1,28 @@
+=== Version 0.4.0 - 2012-12-14 19:37:49 +0000
+
+Adrian Gomez (1):
+* Fixing issue #22
+
+Brad Dunbar (1):
+* Add default option.
+
+Dominik Bamberger (5):
+* Introduce raw bitmask setter.
+* Ensure unsupported values for raw bitmasks raise an exception
+* First reset instance variable then write attribute.
+* Introduce inverse convenience class method
+* Allow only valid entries when setting raw bitmask values directly
+
+François DELFORT (2):
+* Handle single table inheritance
+
+Tee Parham (2):
+* add table name scope to or_is_null_condition
+
+alexanderd (1):
+* Include table name in scope definitions
+
+
 === Version 0.3.0 - 2012-04-30 21:36:18 +0100
 
 Aaron Hamid (1):
@@ -36,6 +61,7 @@ Ivan Buiko (3):
 Joel Moss (3):
 * Added changeling tasks for help with gem releases
 * Created docs using sdoc
+
 
 
 
