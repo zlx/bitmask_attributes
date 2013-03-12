@@ -148,7 +148,7 @@ class BitmaskAttributesTest < ActiveSupport::TestCase
 
         assert_equal [:web, :print],instance2.medium
 
-        instance2.reload
+        assert_equal @campaign_class,instance2.reload.class
         assert_equal [:email],instance2.medium
       end
 

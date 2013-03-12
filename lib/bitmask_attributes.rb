@@ -47,6 +47,7 @@ module BitmaskAttributes
   def reload(*)
     super
     self.class.bitmasks.keys.each{|attribute| self.send("reload_#{attribute}")}
+    self
   end
 end
 
