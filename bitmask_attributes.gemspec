@@ -13,6 +13,6 @@ Gem::Specification.new do |gem|
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   gem.require_paths = ['lib']
   gem.version       = BitmaskAttributes::VERSION.dup
-
-  gem.add_dependency 'activerecord', '> 3.0'
+  
+  gem.add_dependency 'activerecord', '>= 3.0', "< 5.0"
 end
