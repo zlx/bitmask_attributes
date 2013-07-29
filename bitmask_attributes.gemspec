@@ -14,5 +14,6 @@ Gem::Specification.new do |gem|
   gem.require_paths = ['lib']
   gem.version       = BitmaskAttributes::VERSION.dup
   
-  gem.add_dependency 'activerecord', '~> 3.0'
+  gem.add_dependency 'activerecord', '>= 3.0'
+  gem.add_development_dependency "appraisal",     "~> 0.5.1"
 end
