@@ -333,4 +333,18 @@ class BitmaskAttributesTest < ActiveSupport::TestCase
   context_with_classes 'Campaign without null attributes', CampaignWithoutNull, CompanyWithoutNull
   context_with_classes 'SubCampaign with null attributes', SubCampaignWithNull, CompanyWithNull
   context_with_classes 'SubCampaign without null attributes', SubCampaignWithoutNull, CompanyWithoutNull
+  
+  should "allow subclasses to have different values for bitmask than parent" do
+    a = CampaignWithNull.new
+    b = SubCampaignWithNull.new
+    a.different_per_class = [:set_for_parent]
+    b.different_per_class = [:set_for_sub]
+    a.save!
+    b.save!
+    a.reload
+    b.reload
+    assert_equal a.different_per_class, [:set_for_parent]
+    assert_equal b.different_per_class, [:set_for_sub]
+  end
+  
 end
